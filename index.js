@@ -3,14 +3,15 @@
 
 const needle = require("needle");
 require("dotenv").config();
+const compendium = require("compendium-js");
 // The code below sets the bearer token from your environment variables
 // To set environment variables on macOS or Linux, run the export command below from the terminal:
 // export BEARER_TOKEN='YOUR-TOKEN'
 const token = process.env.BEARER_TOKEN;
-console.log(token);
 const rulesURL = "https://api.twitter.com/2/tweets/search/stream/rules";
 const streamURL = "https://api.twitter.com/2/tweets/search/stream";
 
+let sentimentArray = [];
 // this sets up two rules - the value is the search terms to match on, and the tag is an identifier that
 // will be applied to the Tweets return to show which rule they matched
 // with a standard project with Basic Access, you can add up to 25 concurrent rules to your stream, and
@@ -19,12 +20,8 @@ const streamURL = "https://api.twitter.com/2/tweets/search/stream";
 // Edit rules as desired below
 const rules = [
   {
-    value: "dog has:images -is:retweet",
-    tag: "dog pictures",
-  },
-  {
-    value: "cat has:images -grumpy",
-    tag: "cat pictures",
+    value: "#AUSvWI -is:retweet lang:en",
+    tag: "main",
   },
 ];
 
@@ -102,7 +99,23 @@ function streamConnect(retryAttempt) {
     .on("data", (data) => {
       try {
         const json = JSON.parse(data);
-        console.log(json);
+        const sentiment = compendium.analyse(json.data.text)[0].profile
+          .sentiment;
+        if (sentiment !== 0) {
+          console.log(sentiment);
+          sentimentArray.push(
+            compendium.analyse(json.data.text)[0].profile.sentiment
+          );
+        }
+        console.log("-----------------");
+        console.log("Tweet:", json.data.text);
+        console.log("Sentiment:,", sentiment);
+        console.log(
+          "Average Sentiment:",
+          sentimentArray.reduce((a, b) => a + b, 0) / sentimentArray.length
+        );
+        console.log("-----------------");
+
         // A successful connection resets retry count.
         retryAttempt = 0;
       } catch (e) {
