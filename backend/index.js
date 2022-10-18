@@ -160,6 +160,10 @@ function streamConnect(retryAttempt, socket) {
 io.on("connection", (socket) => {
   console.log("a user connected");
   io.emit("connection", "connected");
+  socket.on("disconnect", () => {
+    console.log("user disconnected");
+    process.exit(1);
+  });
   socket.on("param", async (param) => {
     console.log(param);
     const rules = [
