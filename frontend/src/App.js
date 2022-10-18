@@ -53,15 +53,29 @@ function App() {
           }}
         >
           <InputBase
+            onChange={(e) => setText(e.target.value)}
             sx={{ ml: 1, flex: 1 }}
             placeholder="Type a tag"
             inputProps={{ "aria-label": "type a tag" }}
           />
         </Paper>
         <br />
-        <Button variant="contained">Start stream</Button>
+        <Button
+          onClick={() =>
+            socket.emit("param", {
+              rule: text,
+            })
+          }
+          variant="contained"
+        >
+          Start stream
+        </Button>
         <br />
-        <Button color="error" variant="contained">
+        <Button
+          onClick={() => socket.disconnect()}
+          color="error"
+          variant="contained"
+        >
           Stop stream
         </Button>
       </div>
@@ -85,10 +99,15 @@ function App() {
           }}
         >
           <Typography variant="h4">#xyz</Typography>
-          <Typography variant="h6">Average Sentiment: 0.5</Typography>
+          <Typography variant="h6">
+            Average Sentiment:{" "}
+            {tweets.length > 0
+              ? tweets?.[tweets.length - 1]?.averageSentiment
+              : "null"}
+          </Typography>
           <List>
-            {tweets.map((tweet) => (
-              <Item key={tweet.message}>{tweet.message}</Item>
+            {tweets.map((tweet, index) => (
+              <Item key={index}>{tweet.message}</Item>
             ))}
           </List>
         </Paper>
