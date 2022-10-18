@@ -157,7 +157,7 @@ function streamConnect(retryAttempt, socket) {
   return stream;
 }
 
-io.on("connection", (socket) => {
+io.on("connection", async (socket) => {
   console.log("a user connected");
   io.emit("connection", "connected");
   socket.on("disconnect", () => {
