@@ -162,6 +162,7 @@ io.on("connection", async (socket) => {
   io.emit("connection", "connected");
   socket.on("disconnect", () => {
     console.log("user disconnected");
+    io.emit("connection", "disconnect");
     process.exit(1);
   });
   socket.on("param", async (param) => {

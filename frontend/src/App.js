@@ -3,23 +3,25 @@ import { useEffect, useState } from "react";
 const socket = io.connect("http://localhost:3000");
 function App() {
   const [text, setText] = useState("");
-  const [output, setOutput] = useState([]);
+  const [tweets, setTweets] = useState([]);
   useEffect(() => {
-    socket.on("connect", () => {
-      console.log("connected");
+    socket.on("connect", () => {});
+    socket.on("connection", (data) => {
+      console.log(data);
     });
     socket.on("output", (data) => {
       console.log(data);
-      if (output.length > 0) {
-        setOutput(output.push(data));
-      } else {
-        setOutput([data]);
-      }
+      setTweets((tweets) => [...tweets, data]);
     });
   }, [socket]);
 
   return (
     <>
+      <h1>
+        {tweets.length > 0
+          ? tweets?.[tweets.length - 1]?.averageSentiment
+          : "average sentiment"}
+      </h1>
       <button
         onClick={() =>
           socket.emit("param", {
@@ -30,8 +32,9 @@ function App() {
         Send Message
       </button>
       <input type="text" onChange={(e) => setText(e.target.value)} />
+      <button onClick={() => socket.disconnect()}>Disconnect</button>
       <div>
-        {output.map((item) => (
+        {tweets.map((item) => (
           <div>
             <p>{item.message}</p>
             <p>{item.sentiment}</p>
