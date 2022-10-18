@@ -1,9 +1,21 @@
 import io from "socket.io-client";
 import { useEffect, useState } from "react";
+import { styled } from "@mui/material/styles";
+import Paper from "@mui/material/Paper";
+import InputBase from "@mui/material/InputBase";
+import Button from "@mui/material/Button";
+import { List, Typography } from "@mui/material";
 const socket = io.connect("http://localhost:3000");
 function App() {
   const [text, setText] = useState("");
   const [tweets, setTweets] = useState([]);
+  const Item = styled(Paper)(({ theme }) => ({
+    backgroundColor: theme.palette.mode === "dark" ? "#1A2027" : "#fff",
+    ...theme.typography.body2,
+    padding: theme.spacing(1),
+    textAlign: "center",
+    color: theme.palette.text.secondary,
+  }));
   useEffect(() => {
     socket.on("connect", () => {});
     socket.on("connection", (data) => {
@@ -16,33 +28,99 @@ function App() {
   }, [socket]);
 
   return (
-    <>
-      <h1>
-        {tweets.length > 0
-          ? tweets?.[tweets.length - 1]?.averageSentiment
-          : "average sentiment"}
-      </h1>
-      <button
-        onClick={() =>
-          socket.emit("param", {
-            rule: text,
-          })
-        }
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "flex-start",
+        height: "100vh",
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+        }}
       >
-        Send Message
-      </button>
-      <input type="text" onChange={(e) => setText(e.target.value)} />
-      <button onClick={() => socket.disconnect()}>Disconnect</button>
-      <div>
-        {tweets.map((item) => (
-          <div>
-            <p>{item.message}</p>
-            <p>{item.sentiment}</p>
-            <p>{item.averageSentiment}</p>
-          </div>
-        ))}
+        <Paper
+          component="form"
+          sx={{
+            p: "2px 4px",
+            display: "flex",
+            alignItems: "center",
+            width: 400,
+          }}
+        >
+          <InputBase
+            sx={{ ml: 1, flex: 1 }}
+            placeholder="Type a tag"
+            inputProps={{ "aria-label": "type a tag" }}
+          />
+        </Paper>
+        <Button variant="contained">Start stream</Button>
+
+        <Button color="secondary" variant="contained">
+          Stop stream
+        </Button>
       </div>
-    </>
+
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "row",
+          alignItems: "flex-start",
+          margin: "5em",
+          justifyContent: "flex-start",
+        }}
+      >
+        <Paper
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "flex-start",
+            padding: "2em",
+          }}
+        >
+          <Typography variant="h4">#xyz</Typography>
+          <Typography variant="h6">Average Sentiment: 0.5</Typography>
+          <List>
+            {tweets.map((tweet) => (
+              <Item key={tweet.message}>{tweet.message}</Item>
+            ))}
+          </List>
+        </Paper>
+      </div>
+    </div>
+
+    // <>
+    //   <h1>
+    //     {tweets.length > 0
+    //       ? tweets?.[tweets.length - 1]?.averageSentiment
+    //       : "average sentiment"}
+    //   </h1>
+    //   <button
+    //     onClick={() =>
+    //       socket.emit("param", {
+    //         rule: text,
+    //       })
+    //     }
+    //   >
+    //     Send Message
+    //   </button>
+    //   <input type="text" onChange={(e) => setText(e.target.value)} />
+    //   <button onClick={() => socket.disconnect()}>Disconnect</button>
+    //   <div>
+    //     {tweets.map((item) => (
+    //       <div>
+    //         <p>{item.message}</p>
+    //         <p>{item.sentiment}</p>
+    //         <p>{item.averageSentiment}</p>
+    //       </div>
+    //     ))}
+    //   </div>
+    // </>
   );
 }
 
