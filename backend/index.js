@@ -28,12 +28,6 @@ let sentimentArray = [];
 // each rule can be up to 512 characters long
 
 // Edit rules as desired below
-const rules = [
-  {
-    value: "#win -is:retweet lang:en",
-    tag: "main",
-  },
-];
 
 async function getAllRules() {
   const response = await needle("get", rulesURL, {
@@ -77,7 +71,7 @@ async function deleteAllRules(rules) {
   return response.body;
 }
 
-async function setRules() {
+async function setRules(rules) {
   const data = {
     add: rules,
   };
@@ -95,10 +89,7 @@ async function setRules() {
 
   return response.body;
 }
-io.on("connection", (socket) => {
-  console.log("a user connected");
-  io.emit("connection", "connected");
-});
+
 function streamConnect(retryAttempt, socket) {
   const stream = needle.get(streamURL, {
     headers: {
@@ -128,7 +119,7 @@ function streamConnect(retryAttempt, socket) {
           sentimentArray.reduce((a, b) => a + b, 0) / sentimentArray.length
         );
         console.log("-----------------");
-        io.emit("recieve message", {
+        io.emit("output", {
           message: json.data.text,
           sentiment: sentiment,
           averageSentiment:
@@ -166,26 +157,37 @@ function streamConnect(retryAttempt, socket) {
   return stream;
 }
 
-(async () => {
-  let currentRules;
+io.on("connection", (socket) => {
+  console.log("a user connected");
+  io.emit("connection", "connected");
+  socket.on("param", async (param) => {
+    console.log(param);
+    const rules = [
+      {
+        value: `#${param.rule} -is:retweet lang:en`,
+        tag: "main",
+      },
+    ];
+    let currentRules;
 
-  try {
-    // Gets the complete list of rules currently applied to the stream
-    currentRules = await getAllRules();
+    try {
+      // Gets the complete list of rules currently applied to the stream
+      currentRules = await getAllRules();
 
-    // Delete all rules. Comment the line below if you want to keep your existing rules.
-    await deleteAllRules(currentRules);
+      // Delete all rules. Comment the line below if you want to keep your existing rules.
+      await deleteAllRules(currentRules);
 
-    // Add rules to the stream. Comment the line below if you don't want to add new rules.
-    await setRules();
-  } catch (e) {
-    console.error(e);
-    process.exit(1);
-  }
+      // Add rules to the stream. Comment the line below if you don't want to add new rules.
+      await setRules(rules);
+    } catch (e) {
+      console.error(e);
+      process.exit(1);
+    }
 
-  // Listen to the stream.
-  streamConnect(0);
-})();
+    // Listen to the stream.
+    streamConnect(0);
+  });
+});
 
 server.listen(3000, () => {
   console.log("listening on *:3000");
