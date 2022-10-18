@@ -58,9 +58,10 @@ function App() {
             inputProps={{ "aria-label": "type a tag" }}
           />
         </Paper>
+        <br />
         <Button variant="contained">Start stream</Button>
-
-        <Button color="secondary" variant="contained">
+        <br />
+        <Button color="error" variant="contained">
           Stop stream
         </Button>
       </div>
