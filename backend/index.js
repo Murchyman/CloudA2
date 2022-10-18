@@ -4,9 +4,19 @@
 const needle = require("needle");
 require("dotenv").config();
 const compendium = require("compendium-js");
-// The code below sets the bearer token from your environment variables
-// To set environment variables on macOS or Linux, run the export command below from the terminal:
-// export BEARER_TOKEN='YOUR-TOKEN'
+const express = require("express");
+const app = express();
+const cors = require("cors");
+const http = require("http");
+const { Server } = require("socket.io");
+app.use(cors());
+const server = http.createServer(app);
+
+const io = new Server(server, {
+  cors: {
+    origin: "*",
+  },
+});
 const token = process.env.BEARER_TOKEN;
 const rulesURL = "https://api.twitter.com/2/tweets/search/stream/rules";
 const streamURL = "https://api.twitter.com/2/tweets/search/stream";
@@ -20,7 +30,7 @@ let sentimentArray = [];
 // Edit rules as desired below
 const rules = [
   {
-    value: "#AUSvWI -is:retweet lang:en",
+    value: "#win -is:retweet lang:en",
     tag: "main",
   },
 ];
@@ -85,8 +95,11 @@ async function setRules() {
 
   return response.body;
 }
-
-function streamConnect(retryAttempt) {
+io.on("connection", (socket) => {
+  console.log("a user connected");
+  io.emit("connection", "connected");
+});
+function streamConnect(retryAttempt, socket) {
   const stream = needle.get(streamURL, {
     headers: {
       "User-Agent": "v2FilterStreamJS",
@@ -115,7 +128,12 @@ function streamConnect(retryAttempt) {
           sentimentArray.reduce((a, b) => a + b, 0) / sentimentArray.length
         );
         console.log("-----------------");
-
+        io.emit("recieve message", {
+          message: json.data.text,
+          sentiment: sentiment,
+          averageSentiment:
+            sentimentArray.reduce((a, b) => a + b, 0) / sentimentArray.length,
+        });
         // A successful connection resets retry count.
         retryAttempt = 0;
       } catch (e) {
@@ -168,3 +186,7 @@ function streamConnect(retryAttempt) {
   // Listen to the stream.
   streamConnect(0);
 })();
+
+server.listen(3000, () => {
+  console.log("listening on *:3000");
+});
