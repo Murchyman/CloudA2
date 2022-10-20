@@ -20,7 +20,7 @@ const io = new Server(server, {
 const token = process.env.BEARER_TOKEN;
 const rulesURL = "https://api.twitter.com/2/tweets/search/stream/rules";
 const streamURL = "https://api.twitter.com/2/tweets/search/stream";
-
+let globalTag = "";
 let sentimentArray = [];
 // this sets up two rules - the value is the search terms to match on, and the tag is an identifier that
 // will be applied to the Tweets return to show which rule they matched
@@ -114,12 +114,14 @@ function streamConnect(retryAttempt, socket) {
         console.log("-----------------");
         console.log("Tweet:", json.data.text);
         console.log("Sentiment:,", sentiment);
+        console.log(globalTag);
         console.log(
           "Average Sentiment:",
           sentimentArray.reduce((a, b) => a + b, 0) / sentimentArray.length
         );
         console.log("-----------------");
         io.emit("output", {
+          tag: globalTag,
           message: json.data.text,
           sentiment: sentiment,
           averageSentiment:
@@ -167,6 +169,7 @@ io.on("connection", async (socket) => {
   });
   socket.on("param", async (param) => {
     console.log(param);
+    globalTag = param.rule;
     const rules = [
       {
         value: `#${param.rule} -is:retweet lang:en`,

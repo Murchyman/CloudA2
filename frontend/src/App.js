@@ -7,7 +7,7 @@ import Button from "@mui/material/Button";
 import { List, Typography } from "@mui/material";
 const socket = io.connect("http://localhost:3000");
 function App() {
-  const [text, setText] = useState("");
+  const [tag, setTag] = useState("");
   const [tweets, setTweets] = useState([]);
   const Item = styled(Paper)(({ theme }) => ({
     backgroundColor: theme.palette.mode === "dark" ? "#1A2027" : "#fff",
@@ -53,7 +53,7 @@ function App() {
           }}
         >
           <InputBase
-            onChange={(e) => setText(e.target.value)}
+            onChange={(e) => setTag(e.target.value)}
             sx={{ ml: 1, flex: 1 }}
             placeholder="Type a tag"
             inputProps={{ "aria-label": "type a tag" }}
@@ -63,7 +63,7 @@ function App() {
         <Button
           onClick={() =>
             socket.emit("param", {
-              rule: text,
+              rule: tag,
             })
           }
           variant="contained"
