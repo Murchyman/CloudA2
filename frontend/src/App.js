@@ -4,6 +4,7 @@ import { styled } from "@mui/material/styles";
 import Paper from "@mui/material/Paper";
 import InputBase from "@mui/material/InputBase";
 import Button from "@mui/material/Button";
+import Divider from "@mui/material/Divider";
 import { List, Typography } from "@mui/material";
 const socket = io.connect("http://localhost:3000");
 function App() {
@@ -85,7 +86,7 @@ function App() {
           display: "flex",
           flexDirection: "row",
           alignItems: "flex-start",
-          margin: "5em",
+          margin: "3em",
           justifyContent: "flex-start",
         }}
       >
@@ -96,9 +97,12 @@ function App() {
             alignItems: "center",
             justifyContent: "flex-start",
             padding: "2em",
+            maxHeight: "50vh",
+            maxWidth: "33vw",
+            overflow: "auto",
           }}
         >
-          <Typography variant="h4">#xyz</Typography>
+          <Typography variant="h4">#{tag}</Typography>
           <Typography variant="h6">
             Average Sentiment:{" "}
             {tweets.length > 0
@@ -107,7 +111,14 @@ function App() {
           </Typography>
           <List>
             {tweets.map((tweet, index) => (
-              <Item key={index}>{tweet.message}</Item>
+              <Item key={index}>
+                <div>{tweet.message}</div>
+                <h5>
+                  sentiment{" "}
+                  {tweet.sentiment === 0 ? "neutral" : tweet.sentiment}
+                </h5>
+                <Divider />
+              </Item>
             ))}
           </List>
         </Paper>
