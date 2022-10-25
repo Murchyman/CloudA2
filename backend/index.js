@@ -8,6 +8,7 @@ const express = require("express");
 const app = express();
 const cors = require("cors");
 const http = require("http");
+var SpellChecker = require("simple-spellchecker");
 const { Server } = require("socket.io");
 app.use(cors());
 const server = http.createServer(app);
@@ -101,7 +102,24 @@ function streamConnect(retryAttempt, socket) {
 
   stream
     .on("data", (data) => {
+      //check each word for spelling, if it is misspelled, add it to the array
+
       try {
+        let misspelledWords = [];
+        let misspelledWordsCount = 0;
+        SpellChecker.getDictionary("en-US", function (err, dictionary) {
+          if (err) {
+            console.log(err);
+          }
+          console.log(data.data);
+          let words = data.data.text.split(" ");
+          words.forEach((word) => {
+            if (dictionary.spellCheck(word) === false) {
+              misspelledWords.push(word);
+              misspelledWordsCount++;
+            }
+          });
+        });
         const json = JSON.parse(data);
         const sentiment = compendium.analyse(json.data.text)[0].profile
           .sentiment;
@@ -119,6 +137,8 @@ function streamConnect(retryAttempt, socket) {
           "Average Sentiment:",
           sentimentArray.reduce((a, b) => a + b, 0) / sentimentArray.length
         );
+        console.log("Misspelled Words:", misspelledWords);
+        console.log("Misspelled Words Count:", misspelledWordsCount);
         console.log("-----------------");
         io.emit("output", {
           tag: globalTag,

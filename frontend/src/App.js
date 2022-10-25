@@ -5,11 +5,13 @@ import Paper from "@mui/material/Paper";
 import InputBase from "@mui/material/InputBase";
 import Button from "@mui/material/Button";
 import Divider from "@mui/material/Divider";
+import CircularProgress from "@mui/material/CircularProgress";
 import { List, Typography } from "@mui/material";
 const socket = io.connect("http://localhost:3000");
 function App() {
-  const [tag, setTag] = useState("");
+  const [tag, setTag] = useState("giveaway");
   const [tweets, setTweets] = useState([]);
+  const [loading, setLoading] = useState(false);
   const Item = styled(Paper)(({ theme }) => ({
     backgroundColor: theme.palette.mode === "dark" ? "#1A2027" : "#fff",
     ...theme.typography.body2,
@@ -24,6 +26,7 @@ function App() {
     });
     socket.on("output", (data) => {
       console.log(data);
+      setLoading(false);
       setTweets((tweets) => [...tweets, data]);
     });
   }, [socket]);
@@ -36,6 +39,7 @@ function App() {
         alignItems: "center",
         justifyContent: "flex-start",
         height: "100vh",
+        padding: "2em",
       }}
     >
       <div
@@ -62,11 +66,12 @@ function App() {
         </Paper>
         <br />
         <Button
-          onClick={() =>
+          onClick={() => {
             socket.emit("param", {
               rule: tag,
-            })
-          }
+            });
+            setLoading(true);
+          }}
           variant="contained"
         >
           Start stream
@@ -110,6 +115,7 @@ function App() {
               : "null"}
           </Typography>
           <List>
+            {loading ? <CircularProgress /> : null}
             {tweets.map((tweet, index) => (
               <Item key={index}>
                 <div>{tweet.message}</div>
