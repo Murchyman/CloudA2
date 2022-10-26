@@ -109,7 +109,6 @@ function streamConnect(retryAttempt, socket) {
         const wordcheck = new Promise((resolve, reject) => {
           let misspelled = [];
           let handles = [];
-          let hashtags = [];
           SpellChecker.getDictionary("en-US", async function (err, dictionary) {
             if (err) {
               console.log(err);
@@ -133,12 +132,9 @@ function streamConnect(retryAttempt, socket) {
                 if (word[0] === "@") {
                   handles.push(word);
                 }
-                if (word[0] === "#") {
-                  hashtags.push(word);
-                }
               }
             });
-            resolve({ misspelled, handles, hashtags });
+            resolve({ misspelled, handles });
           });
         });
 
@@ -161,7 +157,6 @@ function streamConnect(retryAttempt, socket) {
         );
         console.log("Misspelled Words:", misspelled);
         console.log("Handles:", handles);
-        console.log("Hashtags:", hashtags);
         console.log("-----------------");
         io.emit("output", {
           tag: globalTag,
@@ -171,7 +166,6 @@ function streamConnect(retryAttempt, socket) {
             sentimentArray.reduce((a, b) => a + b, 0) / sentimentArray.length,
           misspelled: misspelled,
           handles: handles,
-          hashtags: hashtags,
         });
         // A successful connection resets retry count.
         retryAttempt = 0;
