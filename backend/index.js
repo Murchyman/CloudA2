@@ -106,20 +106,39 @@ function streamConnect(retryAttempt, socket) {
 
       try {
         const json = JSON.parse(data);
-        const misspelledWords = new Promise((resolve, reject) => {
-          let arr = [];
+        const wordcheck = new Promise((resolve, reject) => {
+          let misspelled = [];
+          let handles = [];
+          let hashtags = [];
           SpellChecker.getDictionary("en-US", async function (err, dictionary) {
             if (err) {
               console.log(err);
             }
             const words = json.data.text.split(" ");
             await words.forEach((word) => {
+              //remove any new line characters
+              word = word.replace(/(\r\n|\n|\r)/gm, "");
+              //remove any punctuation
+              word = word.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "");
+
               if (dictionary.spellCheck(word) === false) {
-                console.log(word);
-                arr.push(word);
+                //make sure it is not a handle or hashtag or link
+                if (
+                  word[0] !== "@" &&
+                  word[0] !== "#" &&
+                  word.includes("http") === false
+                ) {
+                  misspelled.push(word);
+                }
+                if (word[0] === "@") {
+                  handles.push(word);
+                }
+                if (word[0] === "#") {
+                  hashtags.push(word);
+                }
               }
             });
-            resolve(arr);
+            resolve({ misspelled, handles, hashtags });
           });
         });
 
@@ -131,6 +150,7 @@ function streamConnect(retryAttempt, socket) {
             compendium.analyse(json.data.text)[0].profile.sentiment
           );
         }
+        const { misspelled, handles, hashtags } = await wordcheck;
         console.log("-----------------");
         console.log("Tweet:", json.data.text);
         console.log("Sentiment:,", sentiment);
@@ -139,7 +159,9 @@ function streamConnect(retryAttempt, socket) {
           "Average Sentiment:",
           sentimentArray.reduce((a, b) => a + b, 0) / sentimentArray.length
         );
-        console.log("Misspelled Words:", await misspelledWords);
+        console.log("Misspelled Words:", misspelled);
+        console.log("Handles:", handles);
+        console.log("Hashtags:", hashtags);
         console.log("-----------------");
         io.emit("output", {
           tag: globalTag,
@@ -147,7 +169,9 @@ function streamConnect(retryAttempt, socket) {
           sentiment: sentiment,
           averageSentiment:
             sentimentArray.reduce((a, b) => a + b, 0) / sentimentArray.length,
-          misspelledWords: await misspelledWords,
+          misspelled: misspelled,
+          handles: handles,
+          hashtags: hashtags,
         });
         // A successful connection resets retry count.
         retryAttempt = 0;
