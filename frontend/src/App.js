@@ -120,8 +120,24 @@ function App() {
               <Item key={index}>
                 <div>{tweet.message}</div>
                 <h5>
-                  sentiment{" "}
+                  sentiment:{" "}
                   {tweet.sentiment === 0 ? "neutral" : tweet.sentiment}
+                </h5>
+                <h5>
+                  spelling errors:{" "}
+                  {tweet.misspelled.length > 0
+                    ? tweet.misspelled.map((word, index) => (
+                        <span key={index}>{word}, </span>
+                      ))
+                    : null}
+                </h5>
+                <h5>
+                  handles:{" "}
+                  {tweet.handles.length > 0
+                    ? tweet.handles.map((hashtag, index) => (
+                        <span key={index}>{hashtag}, </span>
+                      ))
+                    : null}
                 </h5>
                 <Divider />
               </Item>
