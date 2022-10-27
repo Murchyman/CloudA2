@@ -63,7 +63,7 @@ function App() {
               setTag(e.target.value);
             }}
             sx={{ ml: 1, flex: 1 }}
-            placeholder="Type a tag"
+            placeholder="Type a tag (don't include the #)"
             inputProps={{ "aria-label": "type a tag" }}
           />
         </Paper>
