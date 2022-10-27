@@ -9,7 +9,7 @@ import CircularProgress from "@mui/material/CircularProgress";
 import { List, Typography } from "@mui/material";
 const socket = io.connect("http://localhost:3000");
 function App() {
-  const [tag, setTag] = useState("giveaway");
+  const [tag, setTag] = useState("");
   const [tweets, setTweets] = useState([]);
   const [loading, setLoading] = useState(false);
   const Item = styled(Paper)(({ theme }) => ({
@@ -58,7 +58,10 @@ function App() {
           }}
         >
           <InputBase
-            onChange={(e) => setTag(e.target.value)}
+            onChange={(e) => {
+              setTweets([]);
+              setTag(e.target.value);
+            }}
             sx={{ ml: 1, flex: 1 }}
             placeholder="Type a tag"
             inputProps={{ "aria-label": "type a tag" }}
@@ -95,55 +98,67 @@ function App() {
           justifyContent: "flex-start",
         }}
       >
-        <Paper
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "flex-start",
-            padding: "2em",
-            maxHeight: "50vh",
-            maxWidth: "33vw",
-            overflow: "auto",
-          }}
-        >
-          <Typography variant="h4">#{tag}</Typography>
-          <Typography variant="h6">
-            Average Sentiment:{" "}
-            {tweets.length > 0
-              ? tweets?.[tweets.length - 1]?.averageSentiment
-              : "null"}
-          </Typography>
-          <List>
-            {loading ? <CircularProgress /> : null}
-            {tweets.map((tweet, index) => (
-              <Item key={index}>
-                <div>{tweet.message}</div>
-                <h5>
-                  sentiment:{" "}
-                  {tweet.sentiment === 0 ? "neutral" : tweet.sentiment}
-                </h5>
-                <h5>
-                  spelling errors:{" "}
-                  {tweet.misspelled.length > 0
-                    ? tweet.misspelled.map((word, index) => (
-                        <span key={index}>{word}, </span>
-                      ))
-                    : null}
-                </h5>
-                <h5>
-                  handles:{" "}
-                  {tweet.handles.length > 0
-                    ? tweet.handles.map((hashtag, index) => (
-                        <span key={index}>{hashtag}, </span>
-                      ))
-                    : null}
-                </h5>
-                <Divider />
-              </Item>
-            ))}
-          </List>
-        </Paper>
+        {loading ? <CircularProgress /> : null}
+        {tweets.length > 0 && (
+          <Paper
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "flex-start",
+              padding: "2em",
+              maxHeight: "50vh",
+              maxWidth: "33vw",
+              overflow: "auto",
+            }}
+          >
+            <Typography variant="h4">#{tag}</Typography>
+            <Typography variant="h6">
+              Average Sentiment:{" "}
+              {tweets.length > 0
+                ? tweets?.[tweets.length - 1]?.averageSentiment
+                : "null"}
+            </Typography>
+            <Typography variant="h6">Total Tweets: {tweets.length}</Typography>
+            {/* clear tweets */}
+            <Button
+              onClick={() => setTweets([])}
+              color="error"
+              variant="contained"
+            >
+              Clear tweets
+            </Button>
+
+            <List>
+              {tweets.map((tweet, index) => (
+                <Item key={index}>
+                  <div>{tweet.message}</div>
+                  <h5>
+                    sentiment:{" "}
+                    {tweet.sentiment === 0 ? "neutral" : tweet.sentiment}
+                  </h5>
+                  <h5>
+                    spelling errors:{" "}
+                    {tweet.misspelled.length > 0
+                      ? tweet.misspelled.map((word, index) => (
+                          <span key={index}>{word}, </span>
+                        ))
+                      : null}
+                  </h5>
+                  <h5>
+                    handles:{" "}
+                    {tweet.handles.length > 0
+                      ? tweet.handles.map((hashtag, index) => (
+                          <span key={index}>{hashtag}, </span>
+                        ))
+                      : null}
+                  </h5>
+                  <Divider />
+                </Item>
+              ))}
+            </List>
+          </Paper>
+        )}
       </div>
     </div>
 
