@@ -101,7 +101,15 @@ function App() {
       >
         {loading ? <CircularProgress /> : null}
         {tweets.length > 0 && (
-          <>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              margin: "3em",
+              justifyContent: "flex-start",
+            }}
+          >
             <Paper
               style={{
                 display: "flex",
@@ -110,7 +118,6 @@ function App() {
                 justifyContent: "flex-start",
                 padding: "2em",
                 maxHeight: "50vh",
-                maxWidth: "33vw",
                 overflow: "auto",
               }}
             >
@@ -163,7 +170,7 @@ function App() {
                 ))}
               </List>
             </Paper>
-          </>
+          </div>
         )}
       </div>
     </div>
