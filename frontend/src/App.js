@@ -27,7 +27,8 @@ function App() {
     socket.on("output", (data) => {
       console.log(data);
       setLoading(false);
-      setTweets((tweets) => [...tweets, data]);
+      setTweets((tweets) => [data, ...tweets]);
+      //prepend to tweets
     });
   }, [socket]);
 
@@ -100,95 +101,72 @@ function App() {
       >
         {loading ? <CircularProgress /> : null}
         {tweets.length > 0 && (
-          <Paper
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "flex-start",
-              padding: "2em",
-              maxHeight: "50vh",
-              maxWidth: "33vw",
-              overflow: "auto",
-            }}
-          >
-            <Typography variant="h4">#{tag}</Typography>
-            <Typography variant="h6">
-              Average Sentiment:{" "}
-              {tweets.length > 0
-                ? tweets?.[tweets.length - 1]?.averageSentiment
-                : "null"}
-            </Typography>
-            <Typography variant="h6">Total Tweets: {tweets.length}</Typography>
-            {/* clear tweets */}
-            <Button
-              onClick={() => setTweets([])}
-              color="error"
-              variant="contained"
+          <>
+            <Paper
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "flex-start",
+                padding: "2em",
+                maxHeight: "50vh",
+                maxWidth: "33vw",
+                overflow: "auto",
+              }}
             >
-              Clear tweets
-            </Button>
-
-            <List>
-              {tweets.map((tweet, index) => (
-                <Item key={index}>
-                  <div>{tweet.message}</div>
-                  <h5>
-                    sentiment:{" "}
-                    {tweet.sentiment === 0 ? "neutral" : tweet.sentiment}
-                  </h5>
-                  <h5>
-                    spelling errors:{" "}
-                    {tweet.misspelled.length > 0
-                      ? tweet.misspelled.map((word, index) => (
-                          <span key={index}>{word}, </span>
-                        ))
-                      : null}
-                  </h5>
-                  <h5>
-                    handles:{" "}
-                    {tweet.handles.length > 0
-                      ? tweet.handles.map((hashtag, index) => (
-                          <span key={index}>{hashtag}, </span>
-                        ))
-                      : null}
-                  </h5>
-                  <Divider />
-                </Item>
-              ))}
-            </List>
-          </Paper>
+              <Typography variant="h4">#{tag}</Typography>
+              <Typography variant="h6">
+                Average Sentiment:{" "}
+                {tweets.length > 0
+                  ? tweets?.[tweets.length - 1]?.averageSentiment
+                  : "null"}
+              </Typography>
+              <Typography variant="h6">
+                Total Tweets: {tweets.length}
+              </Typography>
+              {/* clear tweets */}
+              <Button
+                onClick={() => setTweets([])}
+                color="error"
+                variant="contained"
+              >
+                Clear tweets
+              </Button>
+            </Paper>
+            <Paper>
+              <List>
+                {tweets.map((tweet, index) => (
+                  <Item key={index}>
+                    <div>{tweet.message}</div>
+                    <h5>
+                      sentiment:{" "}
+                      {tweet.sentiment === 0 ? "neutral" : tweet.sentiment}
+                    </h5>
+                    <h5>
+                      spelling errors:{" "}
+                      {tweet.misspelled.length > 0
+                        ? tweet.misspelled.map((word, index) => (
+                            <span key={index}>{word}, </span>
+                          ))
+                        : null}
+                    </h5>
+                    <h5>
+                      handles:{" "}
+                      {tweet.handles.length > 0
+                        ? tweet.handles.map((hashtag, index) => (
+                            <span key={index}>{hashtag}, </span>
+                          ))
+                        : null}
+                    </h5>
+                    <Divider />
+                  </Item>
+                ))}
+              </List>
+            </Paper>
+          </>
         )}
       </div>
     </div>
-
-    // <>
-    //   <h1>
-    //     {tweets.length > 0
-    //       ? tweets?.[tweets.length - 1]?.averageSentiment
-    //       : "average sentiment"}
-    //   </h1>
-    //   <button
-    //     onClick={() =>
-    //       socket.emit("param", {
-    //         rule: text,
-    //       })
-    //     }
-    //   >
-    //     Send Message
-    //   </button>
-    //   <input type="text" onChange={(e) => setText(e.target.value)} />
-    //   <button onClick={() => socket.disconnect()}>Disconnect</button>
-    //   <div>
-    //     {tweets.map((item) => (
-    //       <div>
-    //         <p>{item.message}</p>
-    //         <p>{item.sentiment}</p>
-    //         <p>{item.averageSentiment}</p>
-    //       </div>
-    //     ))}
-    //   </div>
-    // </>
   );
 }
 
